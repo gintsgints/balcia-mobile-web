@@ -1,0 +1,9 @@
+<template>
+  <div>
+    <v-app>
+      <v-main>
+        <v-btn>Button</v-btn>
+      </v-main>
+    </v-app>
+  </div>
+</template>
