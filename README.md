@@ -11,6 +11,10 @@ Make sure to install the dependencies:
 npm install
 ```
 
+## Environment
+
+Cognito environment variables should be set. Copy file .env.example to .env and add correct cognito environment values.
+
 ## Development Server
 
 Start the development server on http://localhost:3000
