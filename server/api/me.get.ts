@@ -1,12 +1,19 @@
-export default defineEventHandler(async (event) => {
-  const currentUser = useAuthUser()
-  const binsy_url = process.env.AWS_USER_POOL_ID ? process.env.AWS_USER_POOL_ID : 'not defined'
+import { useAuthUser } from "~~/composables/auth"
 
-  const data = await $fetch(binsy_url + '/rest/me', {
-    method: 'GET',
-    headers: {
-      'Authorization': 'Bearer ' + currentUser.IdToken
-    }
-  })
-  console.log("API return data:", data)
+export default defineEventHandler(async (event) => {
+  const binsy_url = process.env.AWS_USER_POOL_ID ? process.env.AWS_USER_POOL_ID : 'not defined'
+  const currentUser = useAuthUser()
+
+  // try {
+  //   const data = await $fetch(binsy_url + '/rest/me', {
+  //     method: 'GET',
+  //     headers: {
+  //       'Authorization': 'Bearer ' + currentUser.value?.idToken
+  //     }
+  //   })
+  //   return data
+  // } catch (error) {
+  //   return error     
+  // }
+  return currentUser
 })
