@@ -3,11 +3,17 @@ definePageMeta({
   middleware: ['user-only']
 })
 
-const currentUser = useAuthUser()
+const { me } = useMe()
+const person = usePerson()
+
+const getMyData = async () => {
+  await me()
+}
+
 </script>
 
 <template>
-  Private page<br/>
+  <v-btn @click="getMyData">Get My Private Data</v-btn><br/>
   User Obect:<br/>
-  {{ currentUser }}
+  {{ person }}
 </template>

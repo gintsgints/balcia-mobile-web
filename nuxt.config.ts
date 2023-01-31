@@ -12,4 +12,12 @@ export default defineNuxtConfig({
       'process.env.DEBUG': false,
     },
   },
+  nitro: {
+    devProxy: {
+      '/binsy/': {
+        target: 'https://binsy.balcia.com/binsy/rest',
+        changeOrigin: true
+      }
+    }
+  }
 })
