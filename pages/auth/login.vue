@@ -32,6 +32,8 @@
         required
       ></v-text-field>
       <v-btn type="submit">Login</v-btn>
+      <br/>
+      Have no account? <NuxtLink to="/auth/register">Please register</NuxtLink>
     </v-container>
   </v-form>
 </template>
