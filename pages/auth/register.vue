@@ -1,36 +1,38 @@
 <script setup>
-  const { register } = useAuth
 
-  // https://gist.github.com/alexdiliberto/39a4ad0453310d0a69ce
-  const getRandomBytes = (
-    (typeof self !== 'undefined' && (self.crypto || self.msCrypto))
-      ? function() { // Browsers
-          var crypto = (self.crypto || self.msCrypto), QUOTA = 65536;
-          return function(n) {
-            var a = new Uint8Array(n);
-            for (var i = 0; i < n; i += QUOTA) {
-              crypto.getRandomValues(a.subarray(i, i + Math.min(n - i, QUOTA)));
-            }
-            return a;
-          };
-        }
-      : function() { // Node
-          return require("crypto").randomBytes;
-        }
-  )();
-
-  // https://stackoverflow.com/questions/55926281/how-do-i-hash-a-string-using-javascript-with-sha512-algorithm
-  function sha512(str) {
-    return crypto.subtle.digest("SHA-512", new TextEncoder("utf-8").encode(str)).then(buf => {
-      return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+x.toString(16)).slice(-2))).join('');
-    });
+  function _arrayBufferToBase64( buffer ) {
+      var binary = '';
+      var bytes = new Uint8Array( buffer );
+      var len = bytes.byteLength;
+      for (var i = 0; i < len; i++) {
+          binary += String.fromCharCode( bytes[ i ] );
+      }
+      return window.btoa( binary );
   }
 
-  const doRegister = () => {
-    sha512(getRandomBytes(64).toString('base64').slice(0, 64)).then( async x => {
-      console.log(x);
-      register(email_field.value, password_field.value, rc_field.value, x)
-    })
+  async function calculateVerificationCode(documentHash) {
+    const buffer = await self.crypto.subtle.digest('SHA-256', documentHash)
+    const codearray = new Uint8Array(buffer)
+    const firstbyte = codearray[30]
+    const secondbyte = codearray[31]
+    const positiveInteger = ((firstbyte << 8) + secondbyte) & 0xffff
+    const code = positiveInteger.toString()
+    const paddedCode = "0000" + code
+    return paddedCode.substring(code.length)
+  }
+
+
+  const { register } = useAuth()
+
+  const doRegister = async () => {
+    const array = new Int8Array(64)
+    self.crypto.getRandomValues(array);
+    const hashBuffer = await self.crypto.subtle.digest('SHA-512', array);
+    const hashArray = new Int8Array(hashBuffer)
+    const hashEncoded = _arrayBufferToBase64(hashArray)
+    code.value = await calculateVerificationCode(hashArray)
+    console.log("Verification code to show: ", code)
+    register(email_field.value, password_field.value, rc_field.value, hashEncoded)
   }
 
   const email_field = ref('')
@@ -39,10 +41,12 @@
   const password2_field = ref('')
   const show1 = ref(false)
   const show2 = ref(false)
+  const code = ref("")
 </script>
 
 <template>
   <v-form @submit.prevent="doRegister">
+    {{ code }}
     <v-container>
       <v-text-field
         v-model="email_field"
