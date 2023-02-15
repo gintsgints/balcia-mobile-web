@@ -27,10 +27,8 @@ export default defineEventHandler(async (event) => {
   const register = () => {
     return new Promise((resolve, reject) => {
       userPool.signUp(body.email, body.password, attributeList, [], (err: any, result: any) => {
-        console.log("Error", err)
-        console.log("Result", result)
         if (err) {
-          reject()
+          reject(err)
           return;
         }
         resolve(result.user)
@@ -38,5 +36,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return await register()
+  try {
+    return await register()
+  } catch (error) {
+    return error
+  }
 })

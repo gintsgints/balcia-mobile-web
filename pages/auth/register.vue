@@ -32,7 +32,12 @@
     const hashEncoded = _arrayBufferToBase64(hashArray)
     code.value = await calculateVerificationCode(hashArray)
     console.log("Verification code to show: ", code)
-    register(email_field.value, password_field.value, rc_field.value, hashEncoded)
+    try {
+      await register(email_field.value, password_field.value, rc_field.value, hashEncoded)
+      await navigateTo('/auth/login')
+    } catch (callError) {
+      error.value = callError
+    }
   }
 
   const email_field = ref('')
@@ -42,11 +47,13 @@
   const show1 = ref(false)
   const show2 = ref(false)
   const code = ref("")
+  const error = ref("")
 </script>
 
 <template>
   <v-form @submit.prevent="doRegister">
-    {{ code }}
+    {{ code }}<br/>
+    {{ error }}<br/>
     <v-container>
       <v-text-field
         v-model="email_field"
