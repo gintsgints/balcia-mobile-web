@@ -22,6 +22,7 @@
   }
 
   const { register } = useAuth()
+  const error = useAuthError()
 
   const emailRules = [
     (value) => !!value || 'Please provide e-mail for username.'
@@ -40,7 +41,7 @@
   ]
 
   const doRegister = async () => {
-    const { valid } = await this.$refs.form.validate()
+    const { valid } = await form.value.validate()
 
     if (valid) {
       const array = new Int8Array(64)
@@ -49,16 +50,13 @@
       const hashArray = new Int8Array(hashBuffer)
       const hashEncoded = _arrayBufferToBase64(hashArray)
       code.value = await calculateVerificationCode(hashArray)
-      console.log("Verification code to show: ", code)
-      try {
-        await register(emailField.value, passwordField.value, rcField.value, hashEncoded)
-        await navigateTo('/auth/login')
-      } catch (callError) {
-        error.value = callError
-      }
+      await register(emailField.value, passwordField.value, rcField.value, hashEncoded)
+      if (error.value) return
+      await navigateTo('/auth/login')
     }
   }
 
+  const form = ref(null)
   const emailField = ref('')
   const rcField = ref('')
   const passwordField = ref('')
@@ -66,13 +64,21 @@
   const show1 = ref(false)
   const show2 = ref(false)
   const code = ref("")
-  const error = ref("")
 </script>
 
 <template>
-  <v-form validate-on="submit" @submit.prevent="doRegister">
+  <v-form ref="form" validate-on="submit" @submit.prevent="doRegister">
     {{ code }}<br/>
-    {{ error }}<br/>
+    <v-banner
+      lines="one"
+      icon="mdi-lock"
+      color="error"
+      v-if="error"
+    >
+      <v-banner-text>
+        {{ error }}
+      </v-banner-text>
+    </v-banner>
     <v-container>
       <v-text-field
         label="E-mail"

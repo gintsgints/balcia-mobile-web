@@ -1,12 +1,18 @@
 // https://github.com/damien-hl/nuxt3-auth-example
 
 import { useAuthUser } from "./useAuthUser"
+import { useAuthError } from "./useAuthError"
 
 export const useAuth = () => {
   const authUser = useAuthUser()
+  const authError = useAuthError()
 
   const setUser = (user: any) => {
     authUser.value = user
+  }
+
+  const setAuthError = (error: any) => {
+    authError.value = error
   }
 
   const register = async (email: string, password: string, rc: string, hash: string) => {
@@ -21,7 +27,7 @@ export const useAuth = () => {
         }
       })
     } catch (error) {
-      console.log("Error in fetch register:", error)
+      setAuthError(error)
     }
   }
 
@@ -37,7 +43,7 @@ export const useAuth = () => {
       setUser(result)
       
     } catch (error) {
-      console.log("Error in fetch login:", error)
+      setAuthError(error)
     }
   }
 
