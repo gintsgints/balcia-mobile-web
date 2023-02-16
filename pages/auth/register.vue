@@ -21,29 +21,48 @@
     return paddedCode.substring(code.length)
   }
 
-
   const { register } = useAuth()
 
+  const emailRules = [
+    (value) => !!value || 'Please provide e-mail for username.'
+  ]
+  const rcRules = [
+    (value) => !!value || 'Please provide registration code.'
+  ]
+  const passwordRules = [
+    (value) => !!value || 'Please provide password.',
+    (value) => (value && value.length >= 6) || 'minimum 6 characters',
+  ]
+  const confirmPasswordRules = [
+    (value) => !!value || 'Type confirm password.',
+    (value) =>
+          value === passwordField.value || 'The password confirmation does not match.',
+  ]
+
   const doRegister = async () => {
-    const array = new Int8Array(64)
-    self.crypto.getRandomValues(array);
-    const hashBuffer = await self.crypto.subtle.digest('SHA-512', array);
-    const hashArray = new Int8Array(hashBuffer)
-    const hashEncoded = _arrayBufferToBase64(hashArray)
-    code.value = await calculateVerificationCode(hashArray)
-    console.log("Verification code to show: ", code)
-    try {
-      await register(email_field.value, password_field.value, rc_field.value, hashEncoded)
-      await navigateTo('/auth/login')
-    } catch (callError) {
-      error.value = callError
+    const { valid } = await this.$refs.form.validate()
+
+    if (valid) {
+      const array = new Int8Array(64)
+      self.crypto.getRandomValues(array);
+      const hashBuffer = await self.crypto.subtle.digest('SHA-512', array);
+      const hashArray = new Int8Array(hashBuffer)
+      const hashEncoded = _arrayBufferToBase64(hashArray)
+      code.value = await calculateVerificationCode(hashArray)
+      console.log("Verification code to show: ", code)
+      try {
+        await register(emailField.value, passwordField.value, rcField.value, hashEncoded)
+        await navigateTo('/auth/login')
+      } catch (callError) {
+        error.value = callError
+      }
     }
   }
 
-  const email_field = ref('')
-  const rc_field = ref('')
-  const password_field = ref('')
-  const password2_field = ref('')
+  const emailField = ref('')
+  const rcField = ref('')
+  const passwordField = ref('')
+  const confirmPasswordField = ref('')
   const show1 = ref(false)
   const show2 = ref(false)
   const code = ref("")
@@ -51,35 +70,40 @@
 </script>
 
 <template>
-  <v-form @submit.prevent="doRegister">
+  <v-form validate-on="submit" @submit.prevent="doRegister">
     {{ code }}<br/>
     {{ error }}<br/>
     <v-container>
       <v-text-field
-        v-model="email_field"
         label="E-mail"
+        type="email"
         required
+        v-model="emailField"
+        :rules="emailRules"
       ></v-text-field>
       <v-text-field
-        v-model="rc_field"
         label="Personal code:"
         required
+        v-model="rcField"
+        :rules="rcRules"
       ></v-text-field>
       <v-text-field
-        v-model="password_field"
+        label="Password"
+        required
+        v-model="passwordField"
+        :rules="passwordRules"
         :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
         :type="show1 ? 'text' : 'password'"
         @click:append="show1 = !show1"
-        label="Password"
-        required
       ></v-text-field>
       <v-text-field
-        v-model="password2_field"
+        v-model="confirmPasswordField"
+        label="Password repeat"
+        required
+        :rules="confirmPasswordRules"
         :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
         :type="show2 ? 'text' : 'password'"
         @click:append="show2 = !show2"
-        label="Password repeat"
-        required
       ></v-text-field>
       <v-btn type="submit">Register</v-btn>
     </v-container>
