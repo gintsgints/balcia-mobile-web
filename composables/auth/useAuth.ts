@@ -2,10 +2,12 @@
 
 import { useAuthUser } from "./useAuthUser"
 import { useAuthError } from "./useAuthError"
+import { useRegisterRequest } from "./useRegisterRequest"
 
 export const useAuth = () => {
   const authUser = useAuthUser()
   const authError = useAuthError()
+  const registerRequest = useRegisterRequest()
 
   const setUser = (user: any) => {
     authUser.value = user
@@ -15,19 +17,27 @@ export const useAuth = () => {
     authError.value = error
   }
 
-  const register = async (email: string, password: string, rc: string, hash: string) => {
-    try {
-      const data = await $fetch('/api/auth/register', {
-        method: 'POST',
-        body: {
-          email,
-          password,
-          rc,
-          hash
-        }
-      })
-    } catch (error) {
-      setAuthError(error)
+  const setRegisterRequest = (request: any) => {
+    registerRequest.value = request
+  }
+
+  const register = async () => {
+    if (registerRequest.value != null) {
+      setAuthError(null)
+      try {
+        const data = await $fetch('/api/auth/register', {
+          method: 'POST',
+          body: {
+            email: registerRequest.value?.email,
+            password: registerRequest.value?.password,
+            rc: registerRequest.value?.rc,
+            hash: registerRequest.value?.hash
+          }
+        })
+      } catch (error) {
+        setAuthError(error)
+      }
+      setRegisterRequest(null)
     }
   }
 
@@ -48,6 +58,7 @@ export const useAuth = () => {
   }
 
   return {
+    setRegisterRequest,
     register,
     login
   }

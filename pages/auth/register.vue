@@ -21,7 +21,7 @@
     return paddedCode.substring(code.length)
   }
 
-  const { register } = useAuth()
+  const { setRegisterRequest } = useAuth()
   const error = useAuthError()
 
   const emailRules = [
@@ -49,10 +49,9 @@
       const hashBuffer = await self.crypto.subtle.digest('SHA-512', array);
       const hashArray = new Int8Array(hashBuffer)
       const hashEncoded = _arrayBufferToBase64(hashArray)
-      code.value = await calculateVerificationCode(hashArray)
-      await register(emailField.value, passwordField.value, rcField.value, hashEncoded)
-      if (error.value) return
-      await navigateTo('/auth/login')
+      const code = await calculateVerificationCode(hashArray)
+      setRegisterRequest({email: emailField.value, password: passwordField.value, rc: rcField.value, hash: hashEncoded, code})
+      await navigateTo('/auth/wait')
     }
   }
 
@@ -63,12 +62,19 @@
   const confirmPasswordField = ref('')
   const show1 = ref(false)
   const show2 = ref(false)
-  const code = ref("")
 </script>
 
 <template>
   <v-form ref="form" validate-on="submit" @submit.prevent="doRegister">
-    {{ code }}<br/>
+    <v-banner
+      lines="one"
+      icon="mdi-information-outline"
+      color="info"
+    >
+      <v-banner-text>
+        To register you should have working smartID application installed
+      </v-banner-text>
+    </v-banner>
     <v-banner
       lines="one"
       icon="mdi-lock"
