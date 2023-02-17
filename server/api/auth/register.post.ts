@@ -21,6 +21,10 @@ export default defineEventHandler(async (event) => {
     new CognitoUserAttribute({
       Name: 'custom:hash_type',
       Value: 'SHA512'
+    }),
+    new CognitoUserAttribute({
+      Name: 'custom:branch',
+      Value: 'LV'
     })
   ]
 
