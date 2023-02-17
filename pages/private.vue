@@ -8,7 +8,11 @@ const user = useAuthUser()
 const person = usePerson()
 
 const getMyData = async () => {
-  await me()
+  try {
+    await me()
+  } catch (error) {
+    console.log()    
+  }
 }
 
 </script>
