@@ -11,9 +11,10 @@ export const useMe = () => {
 
   const me = async () => {
     try {
-      const data = await $fetch('/binsy/me', {
+      console.log("token:", authUser.value?.idToken)
+      const data = await useFetch('/binsy/me', {
         headers: {
-          'Authorization': 'Bearer ' + authUser.value?.accessToken.jwtToken
+          'Authorization': 'Bearer ' + authUser.value?.idToken.jwtToken
         }
       })
     } catch (error) {

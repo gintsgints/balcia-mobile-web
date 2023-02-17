@@ -25,7 +25,7 @@ export const useAuth = () => {
     if (registerRequest.value != null) {
       setAuthError(null)
       try {
-        const data = await $fetch('/api/auth/register', {
+        await useFetch('/api/auth/register', {
           method: 'POST',
           body: {
             email: registerRequest.value?.email,
@@ -43,14 +43,14 @@ export const useAuth = () => {
 
   const login = async (email: string, password: string) => {
     try {
-      const result = await $fetch("/api/auth/login", {
+      const result = await useFetch("/api/auth/login", {
         method: "post",
         body: {
           email,
           password
         }
       })
-      setUser(result)
+      setUser(result.data)
       
     } catch (error) {
       setAuthError(error)
